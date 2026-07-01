@@ -1,0 +1,57 @@
+# config/strategy.example.yaml
+# Copy this to strategy.yaml and edit before running.
+# strategy.yaml is gitignored — never commit real settings.
+
+# How often to run the strategy loop during market hours (seconds)
+poll_interval_secs: 300   # 5 minutes
+
+# ── Strategy ──────────────────────────────────────────────────────────
+# Set "active" to match the --strategy flag you pass to main.py
+strategy:
+  # --- Mean Reversion ---
+  symbols:
+    - AAPL
+    - MSFT
+    - GOOGL
+    - AMZN
+    - NVDA
+  lookback_days: 20           # N-day SMA window
+  entry_threshold: 0.02       # Buy when price is 2%+ below SMA
+  exit_threshold: 0.01        # Sell when price is 1%+ above SMA
+  dollars_per_trade: 200      # Fixed USD per new position
+
+  # --- Momentum (used when --strategy momentum) ---
+  universe:
+    - AAPL
+    - MSFT
+    - NVDA
+    - GOOGL
+    - AMZN
+    - META
+    - TSLA
+  # lookback_days: 30         # Already defined above (shared)
+  top_n: 3                    # Hold top 3 momentum stocks
+  allocation_pct: 0.80        # Deploy 80% of buying power
+
+  # --- Rebalance (used when --strategy rebalance) ---
+  target_allocation:
+    SPY: 0.40
+    QQQ: 0.30
+    VTI: 0.20
+    CASH: 0.10                # Reserved, not traded
+  drift_tolerance: 0.05       # Rebalance if weight drifts > 5%
+  min_rebalance_interval_hours: 24
+
+# ── Risk Controls ──────────────────────────────────────────────────────
+risk:
+  budget_usd: 500             # Max capital available to agent (USD)
+  max_position_pct: 0.20      # Single position ≤ 20% of total equity
+  daily_loss_limit_pct: 0.03  # Halt trading if daily P&L < -3%
+  max_drawdown_pct: 0.15      # Halt permanently if drawdown > 15%
+  max_trades_per_day: 10      # Circuit breaker on order count
+  price_filter_pct: 0.05      # Skip orders if price moved > 5% from prior close
+
+# ── Monitoring ─────────────────────────────────────────────────────────
+monitor:
+  # Future: webhook URL for Slack/Discord alerts
+  # alert_webhook: "https://hooks.slack.com/services/..."
